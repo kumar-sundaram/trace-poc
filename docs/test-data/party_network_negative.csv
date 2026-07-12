@@ -1,0 +1,4 @@
+scenario,sourceSystem,eventId,partyType,firstName,lastName,entityName,address,ssnOrTaxId,role,loanRef
+VALIDATION_REJECT_BORROWER_NO_ADDRESS,LoanSphere_Origination,433ead43-0d56-4bc9-80ba-a50f45ce771e,INDIVIDUAL,Alex,Noaddress,,,,BORROWER,MF-ERR001
+VALIDATION_REJECT_INDIVIDUAL_MISSING_NAME,LoanSphere_Origination,ffab50b9-5091-4561-ac9c-0f9cbaf8f400,INDIVIDUAL,,,,"500 Error Ln, Portland, OR 97201",,SPONSOR,MF-ERR002
+VALIDATION_REJECT_ENTITY_MISSING_NAME,Core_Invest_DB,1039f0fb-7d28-4109-a25b-f374fb78edd5,ENTITY,,,,"600 Error Ln, Portland, OR 97202",,GUARANTOR,MF-ERR003
