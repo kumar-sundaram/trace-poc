@@ -4,7 +4,17 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository state
 
-This repo is a spec-driven POC build. **The spec is the source of truth** — read `spec/party-network-poc-spec.md` before implementing anything. All requirement references below (FR-x, NFR-x, G-x, §x) point into that file. Synthetic test data lives under `docs/test-data/`; regenerate with `python docs/test-data/generate_parties.py`. No application build/test tooling exists yet; when it is added, record the actual commands here.
+This repo is a spec-driven POC build. **The spec is the source of truth** — read `spec/party-network-poc-spec.md` before implementing anything. All requirement references below (FR-x, NFR-x, G-x, §x) point into that file. Synthetic test data lives under `docs/test-data/`; regenerate with `python docs/test-data/generate_parties.py`.
+
+## Commands
+
+- `make db` / `make db-stop` — start/stop the brew-installed Neo4j (`neo4j start`)
+- `make run` — start the FastAPI app (`uv run uvicorn api.main:app --reload`)
+- `make test` — run the pytest suite (`uv run pytest`; single test: `uv run pytest tests/test_config.py::test_env_override`)
+- `make lint` — `uv run ruff check .`
+- `uv sync` — install/refresh dependencies (dev group included by default)
+
+Settings live in `config/settings.yaml` (NFR-6), overridable via `TRACE_*` env vars with `__` as the nesting delimiter (e.g. `TRACE_SIGNAL__FANOUT_MIN_PARTIES=5`).
 
 ## What is being built
 
@@ -53,6 +63,16 @@ Ranked characteristics when requirements conflict (§5.1): auditability > extens
 - **Configuration over code**: thresholds, disambiguation bands, degree guard, time windows, role vocabulary, and known source systems live in a single pydantic-settings config (NFR-6) — nothing tunable in code. Role vocabulary especially must be config-driven (§4.2).
 - **Degree guard**: nodes above a configurable relationship-count threshold (default 200) are not expanded in Explore and are excluded from signal fan-out matching (FR-14, FR-21).
 - **Signals advise, humans decide**: a signal is advisory, never an automated decision or gate.
+
+## Build decisions (agreed 2026-07-12)
+
+- Tier 3 embeddings: sentence-transformers MiniLM as the local default (384-dim vector index); a hosted-embedding adapter exists only as a non-required stub.
+- Tier 4 mock LLM: name-equality heuristic (equal/near-equal normalized names despite differing addresses → match, else uncertain → new party). This is what makes the HIGH_CONNECTIVITY_NEGATIVE rows (same name, six different addresses) resolve to one party.
+- Fan-out window (FR-17): ingestion processing timestamps stand in for loan origination dates — the test CSVs carry no date column.
+- Role vocabulary config additionally includes `GUARANTOR` and `PROPERTY_MANAGER` (present in the test data).
+- Neo4j runs natively via Homebrew (`brew install neo4j`), not Docker — Docker Desktop is not installed on the dev machine (decided 2026-07-12, superseding the earlier Docker choice). Installed version is 2026.06.0 Community (brew no longer offers 5.x; a known, accepted deviation from NFR-2's literal "5.x" — Community edition, standard Cypher, and native vector indexes all verified present). Credentials `neo4j`/`trace-poc-dev` per `config/settings.yaml`.
+- Python tooling is `uv`; UI is Vite + React 18 + TS with react-force-graph; tests are pytest with the CSVs as fixtures.
+- In scope beyond core: NFR-7 scale probe, USPS street-type normalization, hosted-adapter stubs.
 
 ## Seed dataset and acceptance
 

@@ -1,0 +1,55 @@
+# Single externalized settings file (NFR-6). Nothing tunable lives in code.
+# Every value can be overridden via environment variables with the TRACE_ prefix,
+# nested keys joined by double underscore, e.g. TRACE_NEO4J__URI, TRACE_SIGNAL__FANOUT_MIN_PARTIES.
+
+neo4j:
+  uri: bolt://localhost:7687
+  user: neo4j
+  password: trace-poc-dev
+  database: neo4j
+
+resolve:
+  # Tier 3/4 confidence bands (FR-6): >= auto_match_threshold auto-matches,
+  # < no_match_threshold creates a new party, in between goes to Tier 4 disambiguation.
+  # Initial values per §10 — tuned during demo prep.
+  auto_match_threshold: 0.92
+  no_match_threshold: 0.75
+  # FR-5: address-less (non-borrower) matches are capped below the auto-match band,
+  # so they can never auto-merge — they resolve via disambiguation or as a new party.
+  addressless_confidence_cap: 0.85
+
+embedding:
+  adapter: minilm            # minilm | hosted_stub
+  model: all-MiniLM-L6-v2
+  dimension: 384
+
+llm:
+  adapter: mock              # mock (name-equality heuristic) | hosted_stub
+
+signal:
+  fanout_min_parties: 3      # FR-17: N distinct parties on one shared attribute
+  fanout_window_days: 14     # FR-17: loan origination window (processing timestamps in POC)
+
+# FR-14/FR-21: nodes above this relationship count are not expanded in Explore
+# and are excluded from fan-out matching.
+degree_guard_threshold: 200
+
+# §4.2: role vocabulary is configuration, not code. GUARANTOR and PROPERTY_MANAGER
+# appear in the synthetic test data beyond the spec's named three.
+role_vocabulary:
+  - BORROWER
+  - KEY_BORROWER_PRINCIPAL
+  - SPONSOR
+  - GUARANTOR
+  - PROPERTY_MANAGER
+
+known_source_systems:
+  - LoanSphere_Origination
+  - ServicingMaster_Pro
+  - Core_Invest_DB
+
+streams:
+  # FR-20: append-only JSONL files, each standing in for a broker topic.
+  directory: data/streams
+  resolution_outcome_file: resolution-outcome.jsonl
+  signal_file: signal.jsonl
