@@ -3,7 +3,7 @@
 from functools import lru_cache
 from pathlib import Path
 
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from pydantic_settings import (
     BaseSettings,
     PydanticBaseSettingsSource,
@@ -50,6 +50,11 @@ class StreamSettings(BaseModel):
     resolution_outcome_file: str
     signal_file: str
 
+    @field_validator("directory")
+    @classmethod
+    def anchor_to_repo_root(cls, value: Path) -> Path:
+        return value if value.is_absolute() else REPO_ROOT / value
+
     @property
     def resolution_outcome_path(self) -> Path:
         return self.directory / self.resolution_outcome_file
@@ -74,7 +79,13 @@ class Settings(BaseSettings):
     degree_guard_threshold: int
     role_vocabulary: list[str]
     known_source_systems: list[str]
+    seed_dataset_path: Path
     streams: StreamSettings
+
+    @field_validator("seed_dataset_path")
+    @classmethod
+    def anchor_to_repo_root(cls, value: Path) -> Path:
+        return value if value.is_absolute() else REPO_ROOT / value
 
     @classmethod
     def settings_customise_sources(

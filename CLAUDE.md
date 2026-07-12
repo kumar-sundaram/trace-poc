@@ -10,7 +10,9 @@ This repo is a spec-driven POC build. **The spec is the source of truth** — re
 
 - `make db` / `make db-stop` — start/stop the brew-installed Neo4j (`neo4j start`)
 - `make run` — start the FastAPI app (`uv run uvicorn api.main:app --reload`)
-- `make test` — run the pytest suite (`uv run pytest`; single test: `uv run pytest tests/test_config.py::test_env_override`)
+- `make seed` — full demo reset from the CLI (`uv run python -m api.seeding`): wipe graph + streams, reload the curated CSV through the real ingestion path. Same operation as `POST /admin/reset`. Takes ~2–4 min on Bedrock embeddings (273 events); use `TRACE_EMBEDDING__ADAPTER=hash` for a fast structural load.
+- `make test` — run the pytest suite (`uv run pytest`; single test: `uv run pytest tests/test_config.py::test_env_override`). Full suite includes a Bedrock full-seed test (~4 min); exclude with `-k "not TestSeedResolutionExpectations"` for quick iterations.
+- `make ui` — build the SPA (`cd ui && npm install && npm run build`); FastAPI serves `ui/dist` at `/` when present. Dev mode: `cd ui && npm run dev` (Vite proxy to :8000).
 - `make lint` — `uv run ruff check .`
 - `uv sync` — install/refresh dependencies (dev group included by default)
 
@@ -72,6 +74,7 @@ Ranked characteristics when requirements conflict (§5.1): auditability > extens
 - T3 auto-match requires exact normalizedName equality on top of the score threshold (decided 2026-07-12): the 250 `Generic Holdings {N} LLC` seed entities at one address embed near-identically (~0.99), so score alone would silently merge them. Differing names always go to Tier 4. The mock LLM additionally treats names with differing numeric tokens as distinct registrations (NO_MATCH).
 - T3 thresholds are in Neo4j vector score space, (1+cosine)/2 — calibrated against measured Titan scores (see comments in `config/settings.yaml`).
 - Resolve tests (`tests/test_resolve.py`) run against real Bedrock (skipped without credentials) because thresholds are Titan-calibrated; ingestion tests run on the hash adapter.
+- Signal identity is one per (patternType, attributeId) — a growing cluster is one reviewable fact, so parties joining an already-raised pattern don't re-fire it. When the degree guard trips on an attribute, signals raised earlier (while it was legitimately below threshold) are reclassified to status `EXCLUDED_DEGREE_GUARD`, never deleted; `GET /signals` returns only `RAISED` (decided 2026-07-12 — incremental loading of the 250-party seed address otherwise produced 198 duplicate signals).
 - Role vocabulary config additionally includes `GUARANTOR` and `PROPERTY_MANAGER` (present in the test data).
 - Neo4j runs natively via Homebrew (`brew install neo4j`), not Docker — Docker Desktop is not installed on the dev machine (decided 2026-07-12, superseding the earlier Docker choice). Installed version is 2026.06.0 Community (brew no longer offers 5.x; a known, accepted deviation from NFR-2's literal "5.x" — Community edition, standard Cypher, and native vector indexes all verified present). Credentials `neo4j`/`trace-poc-dev` per `config/settings.yaml`.
 - Python tooling is `uv`; UI is Vite + React 18 + TS with react-force-graph; tests are pytest with the CSVs as fixtures.

@@ -1,0 +1,170 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+}
+
+body {
+  font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 14px;
+  color: #222;
+}
+
+.layout {
+  display: grid;
+  grid-template-areas: "header header" "aside main";
+  grid-template-columns: 320px 1fr;
+  grid-template-rows: 52px 1fr;
+  height: 100vh;
+}
+
+header {
+  grid-area: header;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  background: #1e2a3a;
+  color: #fff;
+}
+
+header h1 {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+aside {
+  grid-area: aside;
+  padding: 16px;
+  border-right: 1px solid #ddd;
+  overflow-y: auto;
+  background: #f7f8fa;
+}
+
+main {
+  grid-area: main;
+  position: relative;
+  overflow: hidden;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-weight: 600;
+  font-size: 12px;
+}
+
+input,
+select {
+  padding: 6px 8px;
+  border: 1px solid #bbb;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+button {
+  padding: 7px 12px;
+  border: none;
+  border-radius: 4px;
+  background: #4c8dff;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+button.danger {
+  background: #b33;
+}
+
+button.link {
+  background: none;
+  color: #4c8dff;
+  padding: 0 6px 0 0;
+  font-weight: 400;
+  font-size: 12px;
+}
+
+h2 {
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #556;
+  margin: 16px 0 8px;
+}
+
+.status {
+  color: #556;
+  font-style: italic;
+}
+
+.error {
+  color: #b33;
+}
+
+.muted {
+  color: #889;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.guards p {
+  background: #fff3cd;
+  border: 1px solid #e6d9a8;
+  border-radius: 4px;
+  padding: 6px 8px;
+  margin-bottom: 6px;
+  font-size: 12px;
+}
+
+.details table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.details td {
+  padding: 3px 6px;
+  border-bottom: 1px solid #e3e5e8;
+  vertical-align: top;
+  overflow-wrap: anywhere;
+}
+
+.details td:first-child {
+  color: #667;
+  white-space: nowrap;
+}
+
+.signal {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-left: 4px solid #e8a13c;
+  border-radius: 4px;
+  padding: 8px;
+  margin-bottom: 8px;
+}
+
+.signal.high {
+  border-left-color: #e05252;
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 8px;
+  color: #556;
+}

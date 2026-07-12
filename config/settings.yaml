@@ -54,6 +54,10 @@ known_source_systems:
   - ServicingMaster_Pro
   - Core_Invest_DB
 
+# FR-25: the curated acceptance fixture, replayed through the real ingestion
+# path by the seed loader / demo reset.
+seed_dataset_path: docs/test-data/party_network_seed_curated.csv
+
 streams:
   # FR-20: append-only JSONL files, each standing in for a broker topic.
   directory: data/streams

@@ -97,6 +97,17 @@ class GraphClient:
             self._embedding_dimension,
         )
 
+    def wipe(self) -> int:
+        """Delete all data (schema survives). Batched via CALL … IN
+        TRANSACTIONS so it copes with the 100k scale dataset; must run in an
+        auto-commit transaction, hence session.run rather than execute_write."""
+        with self.session() as session:
+            result = session.run(
+                "MATCH (n) CALL (n) { DETACH DELETE n } IN TRANSACTIONS OF 10000 ROWS"
+            )
+            summary = result.consume()
+        return summary.counters.nodes_deleted
+
     def ping(self) -> bool:
         try:
             with self.session() as session:

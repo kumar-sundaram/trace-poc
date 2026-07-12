@@ -27,6 +27,10 @@ class EventEmitter(ABC):
         self, source_system: str, event_id: str, payload: SignalPayload
     ) -> EventEnvelope: ...
 
+    def reset(self) -> None:
+        """Clear both streams (demo reset, FR-24). No-op for adapters whose
+        downstream cannot be truncated."""
+
 
 class JsonlEmitter(EventEmitter):
     def __init__(self, settings: Settings) -> None:
@@ -62,6 +66,10 @@ class JsonlEmitter(EventEmitter):
             payload=payload,
         )
         return self._append(self._signal_path, envelope)
+
+    def reset(self) -> None:
+        for path in (self._outcome_path, self._signal_path):
+            path.unlink(missing_ok=True)
 
 
 def build_emitter(settings: Settings) -> EventEmitter:

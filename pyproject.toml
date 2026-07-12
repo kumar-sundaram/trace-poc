@@ -29,6 +29,9 @@ packages = ["api"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+markers = [
+    "acceptance: the automated §8 demo-script walkthrough (slow, needs Bedrock)",
+]
 
 [tool.ruff]
 line-length = 100
