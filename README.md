@@ -13,6 +13,7 @@ A proof-of-concept for a graph-based party network: tiered identity resolution, 
 | Requirements spec (source of truth) | [`spec/party-network-poc-spec.md`](spec/party-network-poc-spec.md) |
 | Boundary contracts (ingestion + outbound events) | [`docs/contracts/`](docs/contracts/) |
 | Synthetic test data / acceptance fixture | [`docs/test-data/`](docs/test-data/) |
+| NFR-7 scale probe results (100k parties / 1M rels) | [`docs/scale-probe-results.md`](docs/scale-probe-results.md) |
 | Contributor guide | [`CONTRIBUTING.md`](CONTRIBUTING.md) |
 
 ## What this POC demonstrates

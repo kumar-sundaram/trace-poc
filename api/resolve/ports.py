@@ -18,6 +18,11 @@ class EmbeddingClient(ABC):
     @abstractmethod
     def embed(self, text: str) -> list[float]: ...
 
+    def embed_batch(self, texts: list[str]) -> list[list[float]]:
+        """Bulk embedding (scale probe). Adapters override when the backend
+        has a faster batch path."""
+        return [self.embed(text) for text in texts]
+
 
 class Judgment(StrEnum):
     MATCH = "MATCH"

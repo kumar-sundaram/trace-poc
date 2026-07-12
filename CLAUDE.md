@@ -11,12 +11,14 @@ This repo is a spec-driven POC build. **The spec is the source of truth** — re
 - `make db` / `make db-stop` — start/stop the brew-installed Neo4j (`neo4j start`)
 - `make run` — start the FastAPI app (`uv run uvicorn api.main:app --reload`)
 - `make seed` — full demo reset from the CLI (`uv run python -m api.seeding`): wipe graph + streams, reload the curated CSV through the real ingestion path. Same operation as `POST /admin/reset`. Takes ~2–4 min on Bedrock embeddings (273 events); use `TRACE_EMBEDDING__ADAPTER=hash` for a fast structural load.
-- `make test` — run the pytest suite (`uv run pytest`; single test: `uv run pytest tests/test_config.py::test_env_override`). Full suite includes a Bedrock full-seed test (~4 min); exclude with `-k "not TestSeedResolutionExpectations"` for quick iterations.
+- `make test` — run the pytest suite (`uv run pytest`; single test: `uv run pytest tests/test_config.py::test_env_override`). The full suite includes two Bedrock full-seed runs (~4 min each: the seed-expectations class and the §8 acceptance walkthrough). Quick iteration: `uv run pytest -m "not acceptance" -k "not TestSeedResolutionExpectations"` (~30s).
 - `make ui` — build the SPA (`cd ui && npm install && npm run build`); FastAPI serves `ui/dist` at `/` when present. Dev mode: `cd ui && npm run dev` (Vite proxy to :8000).
 - `make lint` — `uv run ruff check .`
 - `uv sync` — install/refresh dependencies (dev group included by default)
 
 Settings live in `config/settings.yaml` (NFR-6), overridable via `TRACE_*` env vars with `__` as the nesting delimiter (e.g. `TRACE_SIGNAL__FANOUT_MIN_PARTIES=5`).
+
+**Shared-database warning:** tests, the demo app, and the seeder all use the one local Neo4j. Tests wipe the graph (`clean_graph`), so run `make seed` after a test run to restore the demo dataset — and never run tests concurrently with seeding: they clobber each other's graph state AND the parallel Bedrock calls trip `ThrottlingException` (observed 2026-07-12).
 
 ## What is being built
 
@@ -79,6 +81,7 @@ Ranked characteristics when requirements conflict (§5.1): auditability > extens
 - Neo4j runs natively via Homebrew (`brew install neo4j`), not Docker — Docker Desktop is not installed on the dev machine (decided 2026-07-12, superseding the earlier Docker choice). Installed version is 2026.06.0 Community (brew no longer offers 5.x; a known, accepted deviation from NFR-2's literal "5.x" — Community edition, standard Cypher, and native vector indexes all verified present). Credentials `neo4j`/`trace-poc-dev` per `config/settings.yaml`.
 - Python tooling is `uv`; UI is Vite + React 18 + TS with react-force-graph; tests are pytest with the CSVs as fixtures.
 - In scope beyond core: NFR-7 scale probe, USPS street-type normalization, hosted-adapter stubs.
+- NFR-7 probe (run 2026-07-12, results in `docs/scale-probe-results.md`): uses local MiniLM via the opt-in `scale` dependency group (`uv sync --group scale`, adapter `minilm`, 384-dim) — chosen over Bedrock for the 100k bulk load (cost was trivial, ~$0.05–0.30; sequential call time of 1.5–3h was the blocker). `scripts/scale_probe.py` wipes the graph, bulk-loads with amplified role edges to reach ~1M relationships, and measures Explore p50 + full-graph signal re-run. Run `make seed` afterwards to restore the demo graph and the 512-dim Titan index.
 
 ## Seed dataset and acceptance
 

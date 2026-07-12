@@ -104,6 +104,27 @@ class TestFactoriesAndStubs:
             )
 
 
+class TestMiniLM:
+    """Opt-in adapter (uv sync --group scale); skipped when not installed."""
+
+    def test_minilm_deterministic_and_sized(self):
+        pytest.importorskip("sentence_transformers")
+        from api.resolve.adapters import MiniLMEmbedding
+
+        client = MiniLMEmbedding("all-MiniLM-L6-v2", 384)
+        [v1, v2] = client.embed_batch(["ROBERT CHEN AUSTIN TX"] * 2)
+        assert v1 == v2
+        assert len(v1) == 384
+        assert math.isclose(math.sqrt(sum(x * x for x in v1)), 1.0, rel_tol=1e-3)
+
+    def test_minilm_dimension_mismatch_rejected(self):
+        pytest.importorskip("sentence_transformers")
+        from api.resolve.adapters import MiniLMEmbedding
+
+        with pytest.raises(ValueError):
+            MiniLMEmbedding("all-MiniLM-L6-v2", 512)
+
+
 class TestBedrockTitanIntegration:
     """One live call — skipped when AWS credentials are absent."""
 

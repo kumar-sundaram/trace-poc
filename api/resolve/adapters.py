@@ -51,6 +51,48 @@ class BedrockTitanEmbedding(EmbeddingClient):
         return json.loads(response["body"].read())["embedding"]
 
 
+class MiniLMEmbedding(EmbeddingClient):
+    """Local sentence-transformers model (opt-in: `uv sync --group scale`).
+
+    Used by the NFR-7 scale probe: free, offline, and batch-encodes 100k
+    strings in minutes while filling the vector index with realistically
+    distributed vectors. 384-dim for all-MiniLM-L6-v2 — the vector index is
+    recreated on dimension drift by bootstrap_schema."""
+
+    def __init__(self, model_name: str, dimension: int) -> None:
+        try:
+            from sentence_transformers import SentenceTransformer
+        except ImportError as exc:
+            raise RuntimeError(
+                "sentence-transformers is not installed; run: uv sync --group scale"
+            ) from exc
+        self._model = SentenceTransformer(model_name)
+        get_dim = getattr(
+            self._model, "get_embedding_dimension",
+            self._model.get_sentence_embedding_dimension,
+        )
+        actual = get_dim()
+        if actual != dimension:
+            raise ValueError(
+                f"{model_name} produces {actual}-dim vectors; config says {dimension} "
+                "(set TRACE_EMBEDDING__DIMENSION accordingly)"
+            )
+        self._dimension = dimension
+
+    @property
+    def dimension(self) -> int:
+        return self._dimension
+
+    def embed(self, text: str) -> list[float]:
+        return self.embed_batch([text])[0]
+
+    def embed_batch(self, texts: list[str]) -> list[list[float]]:
+        vectors = self._model.encode(
+            texts, batch_size=256, normalize_embeddings=True, show_progress_bar=False
+        )
+        return [vector.tolist() for vector in vectors]
+
+
 class HashEmbedding(EmbeddingClient):
     """Deterministic character-trigram hashing to a unit vector.
 
@@ -142,6 +184,10 @@ def build_embedding_client(settings: Settings) -> EmbeddingClient:
         )
     if adapter == "hash":
         return HashEmbedding(dimension=settings.embedding.dimension)
+    if adapter == "minilm":
+        return MiniLMEmbedding(
+            model_name=settings.embedding.model, dimension=settings.embedding.dimension
+        )
     raise ValueError(f"unknown embedding adapter: {adapter!r}")
 
 
