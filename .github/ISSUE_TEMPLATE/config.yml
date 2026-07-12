@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Read the spec
+    url: https://github.com/YOUR_ORG/trace-poc/blob/main/spec/party-network-poc-spec.md
+    about: Requirements specification — source of truth for behavior
+  - name: Contributing guide
+    url: https://github.com/YOUR_ORG/trace-poc/blob/main/CONTRIBUTING.md
+    about: How to report issues and open pull requests

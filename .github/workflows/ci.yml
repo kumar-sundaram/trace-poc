@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test-data-generator:
+    name: Validate test data generator
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install generator dependency
+        run: pip install faker
+
+      - name: Regenerate test data
+        run: python docs/test-data/generate_parties.py
+
+      - name: Verify curated fixture exists and has expected scenarios
+        run: |
+          python - <<'PY'
+          import csv
+          from pathlib import Path
+
+          curated = Path("docs/test-data/party_network_seed_curated.csv")
+          assert curated.exists(), "curated seed CSV missing"
+
+          required = {
+              "T2_VARIANT_CLUSTER",
+              "IDEMPOTENCY_DUPLICATE",
+              "FANOUT_POSITIVE",
+              "DEGREE_GUARD",
+          }
+          with curated.open() as f:
+              scenarios = {row["scenario"] for row in csv.DictReader(f)}
+
+          missing = required - scenarios
+          assert not missing, f"missing planted scenarios: {missing}"
+          print(f"OK: {len(scenarios)} scenarios in curated fixture")
+          PY
