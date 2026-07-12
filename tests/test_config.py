@@ -10,7 +10,7 @@ def test_defaults_load_from_yaml():
     assert s.degree_guard_threshold == 200
     assert s.resolve.no_match_threshold < s.resolve.auto_match_threshold
     assert s.resolve.addressless_confidence_cap < s.resolve.auto_match_threshold
-    assert s.embedding.dimension == 384
+    assert s.embedding.dimension in (256, 512, 1024)  # Titan v2 supported sizes
 
 
 def test_role_vocabulary_covers_test_data_roles():

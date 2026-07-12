@@ -1,0 +1,112 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "sourceSystem": {
+      "title": "Sourcesystem",
+      "type": "string"
+    },
+    "eventId": {
+      "title": "Eventid",
+      "type": "string"
+    },
+    "partyType": {
+      "enum": [
+        "INDIVIDUAL",
+        "ENTITY"
+      ],
+      "title": "Partytype",
+      "type": "string"
+    },
+    "firstName": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Firstname"
+    },
+    "lastName": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Lastname"
+    },
+    "entityName": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Entityname"
+    },
+    "address": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Address"
+    },
+    "ssnOrTaxId": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Ssnortaxid"
+    },
+    "role": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Role"
+    },
+    "loanRef": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Loanref"
+    }
+  },
+  "required": [
+    "sourceSystem",
+    "eventId",
+    "partyType"
+  ],
+  "title": "PartyEvent",
+  "type": "object"
+}

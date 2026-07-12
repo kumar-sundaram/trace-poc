@@ -72,6 +72,21 @@ class GraphClient:
         with self.session() as session:
             for statement in SCHEMA_STATEMENTS:
                 session.run(statement).consume()
+            # A vector index can't be altered; if the configured dimension
+            # changed (e.g. embedding adapter swap), drop and recreate.
+            record = session.run(
+                "SHOW INDEXES YIELD name, options WHERE name = $name "
+                "RETURN options.indexConfig['vector.dimensions'] AS dim",
+                name=VECTOR_INDEX_NAME,
+            ).single()
+            if record is not None and record["dim"] != self._embedding_dimension:
+                logger.warning(
+                    "vector index %s has dim=%s, config wants %d — recreating",
+                    VECTOR_INDEX_NAME,
+                    record["dim"],
+                    self._embedding_dimension,
+                )
+                session.run(f"DROP INDEX {VECTOR_INDEX_NAME}").consume()
             session.run(
                 VECTOR_INDEX_STATEMENT, dimension=self._embedding_dimension
             ).consume()

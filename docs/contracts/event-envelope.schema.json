@@ -1,0 +1,169 @@
+{
+  "$defs": {
+    "ResolutionOutcomePayload": {
+      "description": "Intended consumer: the originating transactional system and other data\nconsumers enriching their records with the mastered party.",
+      "properties": {
+        "masteredPartyId": {
+          "title": "Masteredpartyid",
+          "type": "string"
+        },
+        "created": {
+          "description": "True if a new Party was created, false if matched",
+          "title": "Created",
+          "type": "boolean"
+        },
+        "matchTier": {
+          "anyOf": [
+            {
+              "enum": [
+                "T1",
+                "T2",
+                "T3",
+                "T4"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Tier that resolved the match; null when a new party was created",
+          "title": "Matchtier"
+        },
+        "matchMethod": {
+          "title": "Matchmethod",
+          "type": "string"
+        },
+        "confidence": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Confidence",
+          "type": "number"
+        },
+        "rawRecordId": {
+          "description": "Alias linkage: the raw record preserved by FR-7",
+          "title": "Rawrecordid",
+          "type": "string"
+        },
+        "aliasName": {
+          "description": "The name exactly as submitted, preserved as an alias",
+          "title": "Aliasname",
+          "type": "string"
+        }
+      },
+      "required": [
+        "masteredPartyId",
+        "created",
+        "matchMethod",
+        "confidence",
+        "rawRecordId",
+        "aliasName"
+      ],
+      "title": "ResolutionOutcomePayload",
+      "type": "object"
+    },
+    "SignalPayload": {
+      "description": "Intended consumer: risk review. Advisory only \u2014 never a gate (\u00a75.3).",
+      "properties": {
+        "signalId": {
+          "title": "Signalid",
+          "type": "string"
+        },
+        "patternType": {
+          "title": "Patterntype",
+          "type": "string"
+        },
+        "relatedPartyIds": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Relatedpartyids",
+          "type": "array"
+        },
+        "evidencePath": {
+          "description": "Ordered node/edge references substantiating the pattern (FR-19)",
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidencepath",
+          "type": "array"
+        },
+        "severity": {
+          "enum": [
+            "LOW",
+            "MEDIUM",
+            "HIGH"
+          ],
+          "title": "Severity",
+          "type": "string"
+        },
+        "causationEventId": {
+          "description": "eventId of the ingestion event whose processing raised this signal",
+          "title": "Causationeventid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "signalId",
+        "patternType",
+        "relatedPartyIds",
+        "evidencePath",
+        "severity",
+        "causationEventId"
+      ],
+      "title": "SignalPayload",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "eventType": {
+      "enum": [
+        "resolution-outcome",
+        "signal"
+      ],
+      "title": "Eventtype",
+      "type": "string"
+    },
+    "schemaVersion": {
+      "default": "1.0.0",
+      "title": "Schemaversion",
+      "type": "string"
+    },
+    "sourceSystem": {
+      "description": "Correlation: source system of the originating event",
+      "title": "Sourcesystem",
+      "type": "string"
+    },
+    "eventId": {
+      "description": "Correlation: eventId of the originating ingestion event",
+      "title": "Eventid",
+      "type": "string"
+    },
+    "timestamp": {
+      "format": "date-time",
+      "title": "Timestamp",
+      "type": "string"
+    },
+    "payload": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ResolutionOutcomePayload"
+        },
+        {
+          "$ref": "#/$defs/SignalPayload"
+        }
+      ],
+      "title": "Payload"
+    }
+  },
+  "required": [
+    "eventType",
+    "sourceSystem",
+    "eventId",
+    "timestamp",
+    "payload"
+  ],
+  "title": "EventEnvelope",
+  "type": "object"
+}

@@ -9,19 +9,25 @@ neo4j:
   database: neo4j
 
 resolve:
-  # Tier 3/4 confidence bands (FR-6): >= auto_match_threshold auto-matches,
-  # < no_match_threshold creates a new party, in between goes to Tier 4 disambiguation.
-  # Initial values per §10 — tuned during demo prep.
+  # Tier 3/4 confidence bands (FR-6) in Neo4j vector-index score space,
+  # i.e. (1 + cosine)/2. Calibrated 2026-07-12 against Titan v2 scores for the
+  # curated pairs (Patricia same-name/diff-addr 0.952, Jon A./Jonathan 0.900,
+  # Chen fuzzy 0.892, distinct LLCs same addr 0.822, unrelated 0.574).
+  # T3 auto-match additionally requires exact normalizedName equality —
+  # high-scoring lookalikes (e.g. numbered LLCs at one address) go to Tier 4
+  # instead of silently merging (§5.3 fail toward review).
   auto_match_threshold: 0.92
   no_match_threshold: 0.75
+  vector_top_k: 5
   # FR-5: address-less (non-borrower) matches are capped below the auto-match band,
   # so they can never auto-merge — they resolve via disambiguation or as a new party.
   addressless_confidence_cap: 0.85
 
 embedding:
-  adapter: minilm            # minilm | hosted_stub
-  model: all-MiniLM-L6-v2
-  dimension: 384
+  adapter: bedrock_titan     # bedrock_titan | hash (deterministic local fallback, no credentials)
+  model: amazon.titan-embed-text-v2:0
+  dimension: 512             # Titan v2 supports 256/512/1024; must match the vector index
+  region: us-east-1
 
 llm:
   adapter: mock              # mock (name-equality heuristic) | hosted_stub

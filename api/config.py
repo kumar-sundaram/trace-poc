@@ -26,12 +26,14 @@ class ResolveSettings(BaseModel):
     auto_match_threshold: float
     no_match_threshold: float
     addressless_confidence_cap: float
+    vector_top_k: int
 
 
 class EmbeddingSettings(BaseModel):
     adapter: str
     model: str
     dimension: int
+    region: str
 
 
 class LLMSettings(BaseModel):

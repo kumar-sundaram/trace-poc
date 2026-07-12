@@ -34,9 +34,14 @@ def test_lookup_and_vector_indexes_exist(graph: GraphClient):
     idx = graph.execute_read(indexes)
     assert "party_normalized_name" in idx
     assert "property_normalized_address" in idx
+    from api.config import Settings
+
     vector = idx[VECTOR_INDEX_NAME]
     assert vector["type"] == "VECTOR"
-    assert vector["options"]["indexConfig"]["vector.dimensions"] == 384
+    assert (
+        vector["options"]["indexConfig"]["vector.dimensions"]
+        == Settings().embedding.dimension
+    )
 
 
 def test_duplicate_party_id_rejected(graph: GraphClient):

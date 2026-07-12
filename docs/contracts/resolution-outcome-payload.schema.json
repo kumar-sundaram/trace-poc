@@ -1,0 +1,63 @@
+{
+  "description": "Intended consumer: the originating transactional system and other data\nconsumers enriching their records with the mastered party.",
+  "properties": {
+    "masteredPartyId": {
+      "title": "Masteredpartyid",
+      "type": "string"
+    },
+    "created": {
+      "description": "True if a new Party was created, false if matched",
+      "title": "Created",
+      "type": "boolean"
+    },
+    "matchTier": {
+      "anyOf": [
+        {
+          "enum": [
+            "T1",
+            "T2",
+            "T3",
+            "T4"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Tier that resolved the match; null when a new party was created",
+      "title": "Matchtier"
+    },
+    "matchMethod": {
+      "title": "Matchmethod",
+      "type": "string"
+    },
+    "confidence": {
+      "maximum": 1.0,
+      "minimum": 0.0,
+      "title": "Confidence",
+      "type": "number"
+    },
+    "rawRecordId": {
+      "description": "Alias linkage: the raw record preserved by FR-7",
+      "title": "Rawrecordid",
+      "type": "string"
+    },
+    "aliasName": {
+      "description": "The name exactly as submitted, preserved as an alias",
+      "title": "Aliasname",
+      "type": "string"
+    }
+  },
+  "required": [
+    "masteredPartyId",
+    "created",
+    "matchMethod",
+    "confidence",
+    "rawRecordId",
+    "aliasName"
+  ],
+  "title": "ResolutionOutcomePayload",
+  "type": "object"
+}

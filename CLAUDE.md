@@ -66,9 +66,12 @@ Ranked characteristics when requirements conflict (§5.1): auditability > extens
 
 ## Build decisions (agreed 2026-07-12)
 
-- Tier 3 embeddings: sentence-transformers MiniLM as the local default (384-dim vector index); a hosted-embedding adapter exists only as a non-required stub.
+- Tier 3 embeddings: Amazon Bedrock Titan Embed v2 (`amazon.titan-embed-text-v2:0`, 512-dim, us-east-1) as the default adapter (decided 2026-07-12, superseding the earlier MiniLM choice — user preferred Bedrock over a local PyTorch dependency). A deterministic hash-based local adapter (`TRACE_EMBEDDING__ADAPTER=hash`) is the credential-less fallback required by NFR-3, also preferred for CI and the 100k scale probe. Vector index dimension follows config; `bootstrap_schema` drops/recreates the index on dimension drift.
 - Tier 4 mock LLM: name-equality heuristic (equal/near-equal normalized names despite differing addresses → match, else uncertain → new party). This is what makes the HIGH_CONNECTIVITY_NEGATIVE rows (same name, six different addresses) resolve to one party.
-- Fan-out window (FR-17): ingestion processing timestamps stand in for loan origination dates — the test CSVs carry no date column.
+- Fan-out window (FR-17): ingestion processing timestamps stand in for loan origination dates — the test CSVs carry no date column. `Loan.originatedAt` is set on first MERGE.
+- T3 auto-match requires exact normalizedName equality on top of the score threshold (decided 2026-07-12): the 250 `Generic Holdings {N} LLC` seed entities at one address embed near-identically (~0.99), so score alone would silently merge them. Differing names always go to Tier 4. The mock LLM additionally treats names with differing numeric tokens as distinct registrations (NO_MATCH).
+- T3 thresholds are in Neo4j vector score space, (1+cosine)/2 — calibrated against measured Titan scores (see comments in `config/settings.yaml`).
+- Resolve tests (`tests/test_resolve.py`) run against real Bedrock (skipped without credentials) because thresholds are Titan-calibrated; ingestion tests run on the hash adapter.
 - Role vocabulary config additionally includes `GUARANTOR` and `PROPERTY_MANAGER` (present in the test data).
 - Neo4j runs natively via Homebrew (`brew install neo4j`), not Docker — Docker Desktop is not installed on the dev machine (decided 2026-07-12, superseding the earlier Docker choice). Installed version is 2026.06.0 Community (brew no longer offers 5.x; a known, accepted deviation from NFR-2's literal "5.x" — Community edition, standard Cypher, and native vector indexes all verified present). Credentials `neo4j`/`trace-poc-dev` per `config/settings.yaml`.
 - Python tooling is `uv`; UI is Vite + React 18 + TS with react-force-graph; tests are pytest with the CSVs as fixtures.

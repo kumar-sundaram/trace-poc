@@ -1,0 +1,52 @@
+{
+  "description": "Intended consumer: risk review. Advisory only \u2014 never a gate (\u00a75.3).",
+  "properties": {
+    "signalId": {
+      "title": "Signalid",
+      "type": "string"
+    },
+    "patternType": {
+      "title": "Patterntype",
+      "type": "string"
+    },
+    "relatedPartyIds": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Relatedpartyids",
+      "type": "array"
+    },
+    "evidencePath": {
+      "description": "Ordered node/edge references substantiating the pattern (FR-19)",
+      "items": {
+        "type": "string"
+      },
+      "title": "Evidencepath",
+      "type": "array"
+    },
+    "severity": {
+      "enum": [
+        "LOW",
+        "MEDIUM",
+        "HIGH"
+      ],
+      "title": "Severity",
+      "type": "string"
+    },
+    "causationEventId": {
+      "description": "eventId of the ingestion event whose processing raised this signal",
+      "title": "Causationeventid",
+      "type": "string"
+    }
+  },
+  "required": [
+    "signalId",
+    "patternType",
+    "relatedPartyIds",
+    "evidencePath",
+    "severity",
+    "causationEventId"
+  ],
+  "title": "SignalPayload",
+  "type": "object"
+}
