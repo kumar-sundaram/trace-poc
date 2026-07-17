@@ -1,0 +1,99 @@
+[
+  {
+    "label": "T1 \u2014 exact identifier",
+    "expect": "T1",
+    "why": "same ssnOrTaxId + same partyType; name spelling irrelevant",
+    "event": {
+      "eventId": "DEMO-01",
+      "sourceSystem": "SERVICING",
+      "timestamp": "2026-05-24T16:43:00Z",
+      "partyType": "ENTITY",
+      "entityName": "ALPHA 100 L.L.C.",
+      "ssnOrTaxId": "47-1234567",
+      "address": "1209 Orange St",
+      "role": "BORROWER",
+      "loanRef": "MF-400002"
+    }
+  },
+  {
+    "label": "T2 \u2014 normalized name + address",
+    "expect": "T2",
+    "why": "normalizes to same name AND same address as the anchor",
+    "event": {
+      "eventId": "DEMO-02",
+      "sourceSystem": "SURVEILLANCE",
+      "timestamp": "2026-05-25T16:43:00Z",
+      "partyType": "INDIVIDUAL",
+      "firstName": "Patricia",
+      "lastName": "Morrison",
+      "address": "1209 Orange Street",
+      "role": "SPONSOR",
+      "loanRef": "MF-400002"
+    }
+  },
+  {
+    "label": "T3 \u2014 vector auto-match",
+    "expect": "T3",
+    "why": "same name, address recorded WITH the suite -> different Property, so T2 misses; vector catches",
+    "event": {
+      "eventId": "DEMO-03",
+      "sourceSystem": "SERVICING",
+      "timestamp": "2026-05-26T16:43:00Z",
+      "partyType": "INDIVIDUAL",
+      "firstName": "Patricia",
+      "lastName": "Morrison",
+      "address": "1209 Orange Street Suite 300",
+      "role": "GUARANTOR",
+      "loanRef": "MF-401004"
+    }
+  },
+  {
+    "label": "T4 \u2014 AI disambiguation",
+    "expect": "T4",
+    "why": "nickname: score high but name differs -> T3 defers, T4 judges",
+    "event": {
+      "eventId": "DEMO-04",
+      "sourceSystem": "SURVEILLANCE",
+      "timestamp": "2026-05-27T16:43:00Z",
+      "partyType": "INDIVIDUAL",
+      "firstName": "Pat",
+      "lastName": "Morrison",
+      "address": "1209 Orange Street",
+      "role": "SPONSOR",
+      "loanRef": "MF-400105"
+    }
+  },
+  {
+    "label": "REFUSAL \u2014 numeric guard",
+    "expect": "NEW PARTY",
+    "why": "Alpha 100 vs Alpha 200: numeric tokens differ -> hard NO_MATCH",
+    "event": {
+      "eventId": "DEMO-05",
+      "sourceSystem": "ORIGINATION",
+      "timestamp": "2026-05-28T16:43:00Z",
+      "partyType": "ENTITY",
+      "entityName": "Alpha 200 LLC",
+      "ssnOrTaxId": "47-6000001",
+      "address": "1209 Orange Street",
+      "role": "BORROWER",
+      "loanRef": "MF-400106",
+      "loanAmount": 1400000
+    }
+  },
+  {
+    "label": "REFUSAL \u2014 last-name guard",
+    "expect": "NEW PARTY",
+    "why": "surname typo: vector score very high, but last-name guard refuses -> duplicate, not a bad merge",
+    "event": {
+      "eventId": "DEMO-06",
+      "sourceSystem": "SURVEILLANCE",
+      "timestamp": "2026-05-29T16:43:00Z",
+      "partyType": "INDIVIDUAL",
+      "firstName": "Patricia",
+      "lastName": "Morrisson",
+      "address": "1209 Orange Street",
+      "role": "SPONSOR",
+      "loanRef": "MF-400108"
+    }
+  }
+]
